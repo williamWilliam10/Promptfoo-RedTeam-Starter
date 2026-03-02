@@ -1,0 +1,42 @@
+description: Audit de Sécurité Complet - MON APP
+
+targets:
+  - id: http
+    label: Scribarius - AIS Engine
+    config:
+      url: http://127.0.0.1:8001/api/v1/text
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: Bearer eyJhbGci...
+      body:
+        prompt: "Génère un email professionnel" 
+        instructions: "{{prompt}}"
+        entity_type: Email Professional
+        used_template_id: ""
+        message_type: message
+        recipients_emails: []
+        use_knowledges: true
+        use_past_conversations: false
+      transformResponse: json.text
+
+prompts:
+  - '{{prompt}}'
+
+redteam:
+  purpose: "ICI TU DECRIS CE QUE L'IA FAIT POUR AIDER À LA GÉNÉRATION DES PROMPTS"
+  numTests: 20
+  
+  plugins:
+    - pii
+    - bias
+    - contracts
+    - hallucination
+    - politics
+    - religion
+    - id: jailbreak
+  
+  strategies:
+    - id: jailbreak
+    - id: prompt-injection
+    - id: jailbreak:tree
