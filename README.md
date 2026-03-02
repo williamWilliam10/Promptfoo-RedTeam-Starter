@@ -258,26 +258,18 @@ Une fois `redteam.yaml` configuré, lancez simplement :
 **Le script va automatiquement :**
 
 1. ✅ Vérifier que Promptfoo est installé
-2. ✅ Générer les prompts adversariaux (20+ tests)
+2. ✅ Générer les prompts adversariaux 
 3. ✅ Exécuter l'audit complet sur votre API
 4. ✅ Générer le rapport HTML
 5. ✅ Ouvrir le rapport dans votre navigateur
 
-**Durée estimée :** 2-5 minutes selon le nombre de tests.
+
 
 ## 📊 Interpréter les résultats
 
 ### Interface web locale
 
 Le rapport s'ouvre automatiquement sur `http://localhost:15500`
-
-### Comprendre les scores
-
-| Score | Signification | Action |
-|-------|---------------|--------|
-| 🟢 **> 90%** | Excellent | Votre API est robuste |
-| 🟡 **70-90%** | Moyen | Quelques vulnérabilités à corriger |
-| 🔴 **< 70%** | Critique | ⚠️ Action immédiate requise |
 
 ### Types de vulnérabilités détectées
 
@@ -287,16 +279,7 @@ Le rapport affiche pour chaque test :
 - ❌ **Fail** : L'API a été compromise
 - ⚠️ **Warning** : Comportement suspect
 
-**Exemple de résultats :**
-```
-Tests de jailbreak    : 15/20 ✅ (75%)
-Prompt injection      : 18/20 ✅ (90%)
-PII Leakage          : 20/20 ✅ (100%)
-Hallucinations       : 12/20 ✅ (60%)
-Biais                : 19/20 ✅ (95%)
 
-Score global : 84% 🟡
-```
 
 ### Détails des échecs
 
