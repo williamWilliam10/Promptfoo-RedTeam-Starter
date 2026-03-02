@@ -87,17 +87,18 @@ description: Audit de Sécurité Complet - MON APP
 ```yaml
 targets:
   - id: http
-    label: Scribarius - AIS Engine    # ← NOM DE VOTRE API
+    label: Mon Chatbot Support Client    # ← NOM DE VOTRE API
     config:
-      url: http://127.0.0.1:8001/api/v1/text    # ← URL DE VOTRE ENDPOINT
+      url: http://localhost:3000/api/chat    # ← URL DE VOTRE ENDPOINT
       method: POST
       headers:
         Content-Type: application/json
-        Authorization: Bearer eyJhbGci...       # ← VOTRE CLÉ API
+        Authorization: Bearer YOUR_API_KEY_HERE    # ← VOTRE CLÉ API
       body:
-        prompt: "Génère un email professionnel" 
-        instructions: "{{prompt}}"              # ← Le test sera injecté ici
-        entity_type: Email Professional
+        message: "{{prompt}}"              # ← Le test sera injecté ici
+        user_id: "test_user"
+        session_id: "audit_session"
+      transformResponse: json.response
 ```
 
 **À modifier :**
@@ -110,18 +111,19 @@ targets:
 | `body` | Structure JSON de votre API | Adaptez selon votre API |
 | `{{prompt}}` | **NE PAS MODIFIER** - Variable Promptfoo | Laissez tel quel |
 
-**💡 Astuce :** Le champ contenant `{{prompt}}` est l'endroit où Promptfoo injectera les tests. Dans l'exemple ci-dessus, c'est `instructions`.
+**💡 Astuce :** Le champ contenant `{{prompt}}` est l'endroit où Promptfoo injectera les tests. Dans l'exemple ci-dessus, c'est `message`.
 
 **Exemples pour différents types d'APIs :**
 
-**API simple (style OpenAI) :**
+**API style OpenAI :**
 ```yaml
 body:
   prompt: "{{prompt}}"
   temperature: 0.7
+  max_tokens: 500
 ```
 
-**API avec structure complexe :**
+**API avec messages (style ChatGPT) :**
 ```yaml
 body:
   messages:
@@ -131,27 +133,28 @@ body:
       content: "{{prompt}}"
 ```
 
-**API custom avec paramètres métier :**
+**API custom chatbot :**
 ```yaml
 body:
   query: "{{prompt}}"
-  user_id: "test_user"
-  session_id: "audit_session"
+  context: "customer_support"
+  language: "fr"
 ```
 
 ---
 
 ### 🔹 Section 3 : Extraction de la réponse
 ```yaml
-transformResponse: json.text
+transformResponse: json.response
 ```
 
 **À modifier selon votre API :**
 
 | Format de réponse API | `transformResponse` |
 |----------------------|---------------------|
-| `{"text": "..."}` | `json.text` |
 | `{"response": "..."}` | `json.response` |
+| `{"text": "..."}` | `json.text` |
+| `{"message": "..."}` | `json.message` |
 | `{"choices": [{"message": {"content": "..."}}]}` | `json.choices[0].message.content` |
 | `{"content": [{"text": "..."}]}` | `json.content[0].text` |
 | `{"result": {"output": "..."}}` | `json.result.output` |
@@ -163,26 +166,24 @@ transformResponse: json.text
 curl -X POST https://votre-api.com/endpoint \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer VOTRE_CLE" \
-  -d '{"prompt": "Bonjour"}'
+  -d '{"message":"Bonjour"}'
 ```
 
 2. Regardez la réponse JSON :
 ```json
 {
-  "data": {
-    "message": "Réponse de l'IA"
-  }
+  "response": "Bonjour ! Comment puis-je vous aider ?"
 }
 ```
 
-3. Utilisez : `json.data.message`
+3. Utilisez : `json.response`
 
 ---
 
 ### 🔹 Section 4 : Description du contexte (IMPORTANT)
 ```yaml
 redteam:
-  purpose: "ICI TU DECRIS CE QUE L'IA FAIT POUR AIDER À LA GÉNÉRATION DES PROMPTS"
+  purpose: "ICI TU DECRIS CE QUE L'IA FAIT"
 ```
 
 **À modifier :**
@@ -194,14 +195,14 @@ Cette description aide Promptfoo à générer des prompts adversariaux adaptés 
 # Pour un chatbot support client
 purpose: "Assistant de support client qui répond aux questions sur les produits et services de l'entreprise. Doit rester professionnel et ne jamais divulguer d'informations confidentielles."
 
-# Pour un générateur de contenu
+# Pour un générateur de contenu marketing
 purpose: "API de génération de contenu marketing. Crée des emails, posts LinkedIn, et articles de blog. Doit respecter les guidelines de la marque et éviter tout contenu offensant."
 
 # Pour un assistant de code
 purpose: "Assistant de génération de code Python/JavaScript. Aide les développeurs à écrire du code propre et sécurisé. Ne doit jamais générer de code malveillant."
 
-# Pour un chatbot médical
-purpose: "Assistant médical qui fournit des informations de santé générales. Ne doit jamais donner de diagnostic ou remplacer l'avis d'un médecin."
+# Pour un chatbot e-commerce
+purpose: "Assistant e-commerce qui aide les clients à trouver des produits et passer commande. Ne doit pas accepter de paiements directs ni divulguer les prix de gros."
 ```
 
 **💡 Plus la description est précise, meilleurs seront les tests générés.**
@@ -334,7 +335,7 @@ Vérifiez votre `transformResponse`. Testez manuellement :
 ```bash
 curl -X POST votre-url \
   -H "Authorization: Bearer XXX" \
-  -d '{"prompt":"test"}' | jq
+  -d '{"message":"test"}' | jq
 ```
 
 Puis adaptez le chemin JSON.
